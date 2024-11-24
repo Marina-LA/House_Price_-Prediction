@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 np.random.seed(42) # For reproducibility
 
@@ -53,11 +54,19 @@ class NeuralNet:
         train_idx, val_idx = idx[val_size:], idx[:val_size]
 
         X_train, y_train = X[train_idx], y[train_idx]
+        X_val, y_val = X[val_idx], y[val_idx]
+
+        # Store errors for each epoch
+        self.train_errors = []
+        self.val_errors = []
 
         for epoch in range(self.epochs):
             print(f"Epoch {epoch + 1}/{self.epochs}")
 
-            for x, target in zip(X_train, y_train):
+            for pat in range(len(X_train)):
+                # Choose a pattern at random
+                x, target = X_train[pat], y_train[pat]
+                
                 # Perform a feed forward pass
                 self._feed_forward(x)
 
@@ -66,6 +75,14 @@ class NeuralNet:
 
                 # Update the weights and thresholds
                 self._update_weights_thresholds()
+
+            # Calculate training and validation errors
+            train_error = self._calculate_error(X_train, y_train)
+            val_error = self._calculate_error(X_val, y_val)
+
+            self.train_errors.append(train_error)
+            self.val_errors.append(val_error)
+            #print(f"Train Error: {train_error:.4f} | Validation Error: {val_error:.4f}")
 
 
     def _feed_forward(self, x):
@@ -100,6 +117,39 @@ class NeuralNet:
             self.theta[l] += self.d_theta[l] + self.momentum * self.d_theta_prev[l]
             self.d_theta_prev[l] = self.d_theta[l]
 
+
+    def predict(self, X):
+        """Predict the output for a given input."""
+        predictions = [self._feed_forward(x)[-1] for x in X]
+        return np.array(predictions)
+
+
+    def _calculate_error(self, X, y):
+        """Calculate the quadratic error for a given dataset."""
+        total_error = 0
+        for x, target in zip(X, y):
+            self._feed_forward(x)
+            total_error += 0.5 * np.sum((self.xi[-1] - target) ** 2)
+        return total_error / len(X)
+
+
+    def loss_epochs(self):
+        """Return arrays with training and validation errors for each epoch."""
+        return np.array(self.train_errors), np.array(self.val_errors)
+
+
+def plot_errors(train_errors, val_errors):
+    """Plot the evolution of training and validation errors."""
+    epochs = np.arange(1, len(train_errors) + 1)
+    plt.figure(figsize=(10, 6))
+    plt.plot(epochs, train_errors, label="Training Error", marker='o')
+    plt.plot(epochs, val_errors, label="Validation Error", marker='o')
+    plt.title("Training and Validation Errors")
+    plt.xlabel("Epochs")
+    plt.ylabel("Quadratic Error")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -144,7 +194,13 @@ if __name__ == "__main__":
                 [0], [0], [0], [0], [0], [0], [1], [1], [1], [1], [1]])
 
     # Create the neural network
-    nn = NeuralNet(layers=[2, 5, 3, 1], epochs=100, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
+    nn = NeuralNet(layers=[2, 5, 3, 1], epochs=1000, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
 
     # Train the neural network
     nn.fit(X, y)
+
+    # Get the training and validation errors
+    train_errors, val_errors = nn.loss_epochs()
+
+    # Plot the training and validation errors
+    plot_errors(train_errors, val_errors)
