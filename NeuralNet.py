@@ -52,17 +52,13 @@ class NeuralNet:
         train_idx, val_idx = idx[val_size:], idx[:val_size]
 
         X_train, y_train = X[train_idx], y[train_idx]
-        X_val, y_val = X[val_idx], y[val_idx]
-
-        train_errors = []
-        val_errors = []
 
         for epoch in range(self.epochs):
             print(f"Epoch {epoch + 1}/{self.epochs}")
 
             for x, target in zip(X_train, y_train):
                 # Perform a feed forward pass
-                self._feed_forward(x, target)
+                self._feed_forward(x)
 
                 # Perform a backpropagation pass
                 self._back_propagate(target)
@@ -72,6 +68,8 @@ class NeuralNet:
 
     def _feed_forward(self, x):
         """Perform a feed forward pass."""
+
+        """
         # Initialize the activation for the input layer
         self.xi[0] = x
 
@@ -79,6 +77,7 @@ class NeuralNet:
         for l in range(1, self.L):
             self.h[l] = np.dot(self.w[l], self.xi[l - 1]) - self.theta[l]
             self.xi[l] = self._activation_function(self.h[l])
+        """
 
 
     def _back_propagate(self, target):
@@ -132,4 +131,7 @@ if __name__ == "__main__":
                 [0], [0], [0], [0], [0], [0], [1], [1], [1], [1], [1]])
 
     # Create the neural network
-    nn = NeuralNet(layers=[2, 9, 5, 1], epochs=100, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
+    nn = NeuralNet(layers=[2, 5, 3, 1], epochs=100, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
+
+    # Train the neural network
+    nn.fit(X, y)
