@@ -61,7 +61,7 @@ class NeuralNet:
                 self._feed_forward(x)
 
                 # Perform a backpropagation pass
-                self._back_propagate(target)
+                #self._back_propagate(target)
 
 
 
@@ -69,15 +69,16 @@ class NeuralNet:
     def _feed_forward(self, x):
         """Perform a feed forward pass."""
 
-        """
         # Initialize the activation for the input layer
         self.xi[0] = x
 
         # Compute the activations for the hidden layers
         for l in range(1, self.L):
+            print(self.w[l].shape)
+            print(self.xi[l - 1])
             self.h[l] = np.dot(self.w[l], self.xi[l - 1]) - self.theta[l]
-            self.xi[l] = self._activation_function(self.h[l])
-        """
+            self.xi[l] = self._activation_function(self.h[l])[0]
+    
 
 
     def _back_propagate(self, target):
