@@ -64,6 +64,9 @@ class NeuralNet:
                 # Perform a backpropagation pass
                 self._back_propagate(target)
 
+                # Update the weights and thresholds
+                self._update_weights_thresholds()
+
 
     def _feed_forward(self, x):
         """Perform a feed forward pass."""
@@ -87,7 +90,15 @@ class NeuralNet:
 
 
     def _update_weights_thresholds(self):
-        pass
+        """Update the weights and thresholds."""
+        for l in range(1, self.L):
+            self.d_w[l] = -self.learning_rate * np.outer(self.delta[l], self.xi[l - 1])
+            self.w[l] += self.d_w[l] + self.momentum * self.d_w_prev[l]
+            self.d_w_prev[l] = self.d_w[l]
+
+            self.d_theta[l] = self.learning_rate * self.delta[l]
+            self.theta[l] += self.d_theta[l] + self.momentum * self.d_theta_prev[l]
+            self.d_theta_prev[l] = self.d_theta[l]
 
 
 
