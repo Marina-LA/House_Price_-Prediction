@@ -42,6 +42,7 @@ class NeuralNet:
         else:
             raise ValueError("Unknown activation function.")
             
+
     def fit(self, X, y):
         """Training of the neural network."""
         n_samples = X.shape[0]
@@ -61,28 +62,28 @@ class NeuralNet:
                 self._feed_forward(x)
 
                 # Perform a backpropagation pass
-                #self._back_propagate(target)
-
-
+                self._back_propagate(target)
 
 
     def _feed_forward(self, x):
         """Perform a feed forward pass."""
-
         # Initialize the activation for the input layer
         self.xi[0] = x
 
         # Compute the activations for the hidden layers
         for l in range(1, self.L):
-            print(self.w[l].shape)
-            print(self.xi[l - 1])
             self.h[l] = np.dot(self.w[l], self.xi[l - 1]) - self.theta[l]
             self.xi[l] = self._activation_function(self.h[l])[0]
-    
 
 
     def _back_propagate(self, target):
-        pass
+        """Perform a backpropagation pass."""
+        # Compute the delta for the output layer
+        self.delta[-1] = self._activation_function(self.xi[-1])[1] * (self.xi[-1] - target)
+
+        # Compute the delta for the hidden layers
+        for l in range(self.L - 1, 0, -1):
+            self.delta[l-1] = self._activation_function(self.xi[l-1])[1] * np.dot(self.w[l].T, self.delta[l])
 
 
     def _update_weights_thresholds(self):
