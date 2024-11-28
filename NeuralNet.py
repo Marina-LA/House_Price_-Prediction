@@ -120,7 +120,11 @@ class NeuralNet:
 
     def predict(self, X):
         """Predict the output for a given input."""
-        predictions = [self._feed_forward(x)[-1] for x in X]
+        predictions = []
+        for x in X:
+            self._feed_forward(x)
+            predicted = self.xi[-1]
+            predictions.append(predicted)
         return np.array(predictions)
 
 
@@ -194,7 +198,7 @@ if __name__ == "__main__":
                 [0], [0], [0], [0], [0], [0], [1], [1], [1], [1], [1]])
 
     # Create the neural network
-    nn = NeuralNet(layers=[2, 5, 3, 1], epochs=1000, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
+    nn = NeuralNet(layers=[2, 5, 3, 1], epochs=100, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
 
     # Train the neural network
     nn.fit(X, y)
@@ -204,3 +208,9 @@ if __name__ == "__main__":
 
     # Plot the training and validation errors
     plot_errors(train_errors, val_errors)
+
+    # Predict the output for the input data
+    predictions = nn.predict(X)
+
+    # Print the predictions
+    print(predictions)
