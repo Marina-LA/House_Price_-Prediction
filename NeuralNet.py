@@ -48,7 +48,7 @@ class NeuralNet:
         """Training of the neural network."""
         n_samples = X.shape[0]
         idx = np.arange(n_samples)
-        np.random.shuffle(idx)
+        #np.random.shuffle(idx)
 
         val_size = int(self.val_split * n_samples)
         train_idx, val_idx = idx[val_size:], idx[:val_size]
@@ -133,8 +133,9 @@ class NeuralNet:
         total_error = 0
         for x, target in zip(X, y):
             self._feed_forward(x)
-            total_error += 0.5 * np.sum((self.xi[-1] - target) ** 2)
-        return total_error / len(X)
+            total_error += (target - self.xi[-1]) ** 2
+        mean_error = total_error / len(y)
+        return mean_error
 
 
     def loss_epochs(self):
@@ -142,18 +143,18 @@ class NeuralNet:
         return np.array(self.train_errors), np.array(self.val_errors)
 
 
-def plot_errors(train_errors, val_errors):
-    """Plot the evolution of training and validation errors."""
-    epochs = np.arange(1, len(train_errors) + 1)
-    plt.figure(figsize=(10, 6))
-    plt.plot(epochs, train_errors, label="Training Error", marker='o')
-    plt.plot(epochs, val_errors, label="Validation Error", marker='o')
-    plt.title("Training and Validation Errors")
-    plt.xlabel("Epochs")
-    plt.ylabel("Quadratic Error")
-    plt.legend()
-    plt.grid()
-    plt.show()
+    def plot_errors(self, train_errors, val_errors):
+        """Plot the evolution of training and validation errors."""
+        epochs = np.arange(1, len(train_errors) + 1)
+        plt.figure(figsize=(10, 6))
+        plt.plot(epochs, train_errors, label="Training Error", marker='o')
+        plt.plot(epochs, val_errors, label="Validation Error", marker='o')
+        plt.title("Training and Validation Errors")
+        plt.xlabel("Epochs")
+        plt.ylabel("Quadratic Error")
+        plt.legend()
+        plt.grid()
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -207,10 +208,7 @@ if __name__ == "__main__":
     train_errors, val_errors = nn.loss_epochs()
 
     # Plot the training and validation errors
-    plot_errors(train_errors, val_errors)
+    nn.plot_errors(train_errors, val_errors)
 
     # Predict the output for the input data
     predictions = nn.predict(X)
-
-    # Print the predictions
-    print(predictions)
