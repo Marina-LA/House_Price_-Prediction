@@ -60,11 +60,11 @@ def read_json(file_path):
 
 
 def main():
-    X_train = read_data('../data/X_train.csv')
-    y_train = read_data('../data/y_train.csv')
+    X_train = read_data('./data/X_train.csv')
+    y_train = read_data('./data/y_train.csv')
 
-    X_test = read_data('../data/X_test.csv')
-    y_test = read_data('../data/y_test.csv')
+    X_test = read_data('./data/X_test.csv')
+    y_test = read_data('./data/y_test.csv')
 
     """
     parameters_list = read_json('./parameters.json')['parameters']
