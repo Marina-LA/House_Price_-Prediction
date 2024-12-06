@@ -14,7 +14,7 @@ class NeuralNet:
         self.fact = fact  # Activation function
 
         # Initialize arrays of arrays
-        self.h = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
+        self.h = [0.] + [np.zeros(self.n[i]) for i in range(1, self.L)]
         self.xi = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
         self.delta = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
         self.theta = [None] + [np.random.randn(self.n[i]) for i in range(1, self.L)]
@@ -36,7 +36,7 @@ class NeuralNet:
             act = np.maximum(0, x)
             return act, np.where(x > 0, 1, 0)
         elif self.fact == 'linear':
-            return x, np.ones_like(x)
+            return x, 1
         elif self.fact == 'tanh':
             act = np.tanh(x)
             return act, 1 - act**2
@@ -61,7 +61,7 @@ class NeuralNet:
         self.val_errors = []
 
         for epoch in range(self.epochs):
-            print(f"Epoch {epoch + 1}/{self.epochs}")
+            #print(f"Epoch {epoch + 1}/{self.epochs}")
 
             for pat in range(len(X_train)):
                 # Choose a pattern at random
@@ -99,11 +99,11 @@ class NeuralNet:
     def _back_propagate(self, target):
         """Perform a backpropagation pass."""
         # Compute the delta for the output layer
-        self.delta[-1] = self._activation_function(self.xi[-1])[1] * (self.xi[-1] - target)
+        self.delta[-1] = self._activation_function(self.h[-1])[1] * (self.xi[-1] - target)
 
         # Compute the delta for the hidden layers
         for l in range(self.L - 1, 0, -1):
-            self.delta[l-1] = self._activation_function(self.xi[l-1])[1] * np.dot(self.w[l].T, self.delta[l])
+            self.delta[l-1] = self._activation_function(self.h[l-1])[1] * np.dot(self.w[l].T, self.delta[l])
 
 
     def _update_weights_thresholds(self):
@@ -134,81 +134,10 @@ class NeuralNet:
         for x, target in zip(X, y):
             self._feed_forward(x)
             total_error += (target - self.xi[-1]) ** 2
-        mean_error = total_error / len(y)
+        mean_error = total_error / len(target)
         return mean_error
 
 
     def loss_epochs(self):
         """Return arrays with training and validation errors for each epoch."""
         return np.array(self.train_errors), np.array(self.val_errors)
-
-
-    def plot_errors(self, train_errors, val_errors):
-        """Plot the evolution of training and validation errors."""
-        epochs = np.arange(1, len(train_errors) + 1)
-        plt.figure(figsize=(10, 6))
-        plt.plot(epochs, train_errors, label="Training Error", marker='o')
-        plt.plot(epochs, val_errors, label="Validation Error", marker='o')
-        plt.title("Training and Validation Errors")
-        plt.xlabel("Epochs")
-        plt.ylabel("Quadratic Error")
-        plt.legend()
-        plt.grid()
-        plt.show()
-
-
-if __name__ == "__main__":
-	# example data
-    X = np.array([[0.0, 1.0], [0.1, 1.0], [0.2, 1.0], [0.3, 1.0], [0.4, 1.0],
-              [0.5, 1.0], [0.6, 1.0], [0.7, 1.0], [0.8, 1.0], [0.9, 1.0],
-              [1.0, 1.0], [0.0, 0.9], [0.1, 0.9], [0.2, 0.9], [0.3, 0.9],
-              [0.4, 0.9], [0.5, 0.9], [0.6, 0.9], [0.7, 0.9], [0.8, 0.9],
-              [0.9, 0.9], [1.0, 0.9], [0.0, 0.8], [0.1, 0.8], [0.2, 0.8],
-              [0.3, 0.8], [0.4, 0.8], [0.5, 0.8], [0.6, 0.8], [0.7, 0.8],
-              [0.8, 0.8], [0.9, 0.8], [1.0, 0.8], [0.0, 0.7], [0.1, 0.7],
-              [0.2, 0.7], [0.3, 0.7], [0.4, 0.7], [0.5, 0.7], [0.6, 0.7],
-              [0.7, 0.7], [0.8, 0.7], [0.9, 0.7], [1.0, 0.7], [0.0, 0.6],
-              [0.1, 0.6], [0.2, 0.6], [0.3, 0.6], [0.4, 0.6], [0.5, 0.6],
-              [0.6, 0.6], [0.7, 0.6], [0.8, 0.6], [0.9, 0.6], [1.0, 0.6],
-              [0.0, 0.5], [0.1, 0.5], [0.2, 0.5], [0.3, 0.5], [0.4, 0.5],
-              [0.5, 0.5], [0.6, 0.5], [0.7, 0.5], [0.8, 0.5], [0.9, 0.5],
-              [1.0, 0.5], [0.0, 0.4], [0.1, 0.4], [0.2, 0.4], [0.3, 0.4],
-              [0.4, 0.4], [0.5, 0.4], [0.6, 0.4], [0.7, 0.4], [0.8, 0.4],
-              [0.9, 0.4], [1.0, 0.4], [0.0, 0.3], [0.1, 0.3], [0.2, 0.3],
-              [0.3, 0.3], [0.4, 0.3], [0.5, 0.3], [0.6, 0.3], [0.7, 0.3],
-              [0.8, 0.3], [0.9, 0.3], [1.0, 0.3], [0.0, 0.2], [0.1, 0.2],
-              [0.2, 0.2], [0.3, 0.2], [0.4, 0.2], [0.5, 0.2], [0.6, 0.2],
-              [0.7, 0.2], [0.8, 0.2], [0.9, 0.2], [1.0, 0.2], [0.0, 0.1],
-              [0.1, 0.1], [0.2, 0.1], [0.3, 0.1], [0.4, 0.1], [0.5, 0.1],
-              [0.6, 0.1], [0.7, 0.1], [0.8, 0.1], [0.9, 0.1], [1.0, 0.1],
-              [0.0, 0.0], [0.1, 0.0], [0.2, 0.0], [0.3, 0.0], [0.4, 0.0],
-              [0.5, 0.0], [0.6, 0.0], [0.7, 0.0], [0.8, 0.0], [0.9, 0.0],
-              [1.0, 0.0]])
-
-
-    y = np.array([[0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0],
-                [1], [1], [0], [0], [0], [0], [0], [0], [0], [0], [0],
-                [1], [1], [1], [0], [0], [0], [0], [0], [0], [0], [0],
-                [0], [1], [1], [1], [1], [1], [0], [0], [0], [0], [0],
-                [0], [1], [1], [1], [1], [1], [0], [0], [0], [0], [0],
-                [0], [0], [1], [1], [1], [1], [1], [0], [0], [0], [0],
-                [0], [0], [1], [1], [1], [1], [1], [0], [0], [0], [0],
-                [0], [0], [0], [1], [1], [1], [1], [1], [0], [0], [0],
-                [0], [0], [0], [1], [1], [1], [1], [1], [1], [1], [0],
-                [0], [0], [0], [0], [1], [1], [1], [1], [1], [1], [0],
-                [0], [0], [0], [0], [0], [0], [1], [1], [1], [1], [1]])
-
-    # Create the neural network
-    nn = NeuralNet(layers=[2, 5, 3, 1], epochs=100, learning_rate=0.01, momentum=0.8, fact="sigmoid", val_split=0.2)
-
-    # Train the neural network
-    nn.fit(X, y)
-
-    # Get the training and validation errors
-    train_errors, val_errors = nn.loss_epochs()
-
-    # Plot the training and validation errors
-    nn.plot_errors(train_errors, val_errors)
-
-    # Predict the output for the input data
-    predictions = nn.predict(X)
