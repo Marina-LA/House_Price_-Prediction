@@ -14,17 +14,31 @@ class NeuralNet:
         self.fact = fact  # Activation function
 
         # Initialize arrays of arrays
-        self.h = [0.] + [np.zeros(self.n[i]) for i in range(1, self.L)]
-        self.xi = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
-        self.delta = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
-        self.theta = [None] + [np.random.randn(self.n[i]) for i in range(1, self.L)]
-        self.d_theta = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
-        self.d_theta_prev = [None] + [np.zeros(self.n[i]) for i in range(1, self.L)]
+        self.xi = []
+        self.h = []
+        self.delta = []
+        self.theta = []
+        self.d_theta = []
+        self.d_theta_prev = []
+        for lay in range(self.L):
+            self.xi.append(np.zeros(layers[lay]))
+            self.h.append(np.zeros(layers[lay]))
+            self.delta.append(np.zeros(layers[lay]))
+            self.theta.append(np.random.randn(layers[lay]) * np.sqrt(2 / layers[lay - 1] if lay > 0 else 1))
+            self.d_theta.append(np.zeros(layers[lay]))
+            self.d_theta_prev.append(np.zeros(layers[lay]))
 
         # Initialize arrays of matrices
-        self.w = [None] + [np.random.randn(self.n[i], self.n[i - 1]) for i in range(1, self.L)]
-        self.d_w = [None] + [np.random.randn(self.n[i], self.n[i - 1]) for i in range(1, self.L)]
-        self.d_w_prev = [None] + [np.zeros((self.n[i], self.n[i - 1])) for i in range(1, self.L)]
+        self.w = []
+        self.d_w = []
+        self.d_w_prev = []
+        self.w.append(np.random.randn(1, 1) * np.sqrt(2))
+        self.d_w.append(np.zeros((1, 1)))
+        self.d_w_prev.append(np.zeros((1, 1)))
+        for lay in range(1, self.L):
+            self.w.append(np.random.randn(layers[lay], layers[lay - 1]) * np.sqrt(2 / layers[lay - 1]))
+            self.d_w.append(np.zeros((layers[lay], layers[lay - 1])))
+            self.d_w_prev.append(np.zeros((layers[lay], layers[lay - 1])))
 
 
     def _activation_function(self, x):
