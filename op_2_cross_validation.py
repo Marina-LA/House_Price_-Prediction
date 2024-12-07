@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import csv
 
 np.random.seed(42) # For reproducibility
 
@@ -58,44 +59,57 @@ class NeuralNet:
         else:
             raise ValueError("Unknown activation function.")
             
-
-    def fit(self, X, y):
-        """Training of the neural network."""
+    def fit(self, X, y, k_folds=4):
+        """Training the neural network with Cross-Validation."""
         n_samples = X.shape[0]
         idx = np.arange(n_samples)
+        np.random.shuffle(idx)  # Shuffle indices to randomize the folds
 
-        val_size = int(self.val_split * n_samples)
-        train_idx, val_idx = idx[val_size:], idx[:val_size]
+        fold_size = n_samples // k_folds  # Calculate the size of each fold
 
-        X_train, y_train = X[train_idx], y[train_idx]
-        X_val, y_val = X[val_idx], y[val_idx]
+        # Store errors for each fold
+        self.fold_train_errors = []
+        self.fold_val_errors = []
 
-        # Store errors for each epoch
-        self.train_errors = []
-        self.val_errors = []
+        for fold in range(k_folds):
+            print(f"\nFold {fold + 1}/{k_folds}")
 
-        for epoch in tqdm(range(self.epochs)):
-            #print(f"Epoch {epoch + 1}/{self.epochs}")
+            # Define validation indices for the current fold
+            val_idx = idx[fold * fold_size: (fold + 1) * fold_size]
+            # Define training indices as the remaining data
+            train_idx = np.setdiff1d(idx, val_idx)
 
-            for pat in range(len(X_train)):
-                # Choose a pattern at random
-                x, target = X_train[pat], y_train[pat]
-                
-                # Perform a feed forward pass
-                self._feed_forward(x)
+            X_train, y_train = X[train_idx], y[train_idx]
+            X_val, y_val = X[val_idx], y[val_idx]
 
-                # Perform a backpropagation pass
-                self._back_propagate(target)
+            # Initialize errors for this fold
+            self.train_errors = []
+            self.val_errors = []
 
-                # Update the weights and thresholds
-                self._update_weights_thresholds()
+            for epoch in tqdm(range(self.epochs)):
+                for pat in range(len(X_train)):
+                    # Choose a pattern at random
+                    x, target = X_train[pat], y_train[pat]
+                    
+                    # Perform a feed forward pass
+                    self._feed_forward(x)
 
-            # Calculate training and validation errors
-            train_error = self._calculate_error(X_train, y_train)
-            val_error = self._calculate_error(X_val, y_val)
+                    # Perform a backpropagation pass
+                    self._back_propagate(target)
 
-            self.train_errors.append(train_error)
-            self.val_errors.append(val_error)
+                    # Update the weights and thresholds
+                    self._update_weights_thresholds()
+
+                # Calculate training and validation errors for this epoch
+                train_error = self._calculate_error(X_train, y_train)
+                val_error = self._calculate_error(X_val, y_val)
+
+                self.train_errors.append(train_error)
+                self.val_errors.append(val_error)
+
+            # Store the final errors of this fold
+            self.fold_train_errors.append(self.train_errors)
+            self.fold_val_errors.append(self.val_errors)
 
 
 
@@ -154,3 +168,43 @@ class NeuralNet:
     def loss_epochs(self):
         """Return arrays with training and validation errors for each epoch."""
         return np.array(self.train_errors), np.array(self.val_errors)
+    
+
+
+def read_data(file_path):
+    data = []
+    with open(file_path, mode='r', encoding='utf-8-sig') as file:
+        csv_reader = csv.reader(file)
+        next(csv_reader)
+        for row in csv_reader:
+            data.append([float(value) for value in row])
+    return np.array(data)
+
+def mean_squared_error(y_pred, y_true):
+    return np.mean((np.array(y_true) - np.array(y_pred)) ** 2)
+
+def mean_absolute_error(y_pred, y_true):
+    return np.mean(np.abs(np.array(y_true) - np.array(y_pred)))
+
+def mean_absolute_percentage_error(y_pred, y_true):
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    non_zero_indices = y_true != 0
+    return np.mean(np.abs((y_true[non_zero_indices] - y_pred[non_zero_indices]) / y_true[non_zero_indices])) * 100
+
+if __name__ == "__main__":
+    X_train = read_data('./data/X_train.csv')
+    y_train = read_data('./data/y_train.csv')
+
+    X_test = read_data('./data/X_test.csv')
+    y_test = read_data('./data/y_test.csv')
+
+    nn = NeuralNet(layers=[14, 128, 64, 32, 1], epochs=190, learning_rate=0.2, momentum=0.15, fact='tanh', val_split=0.2)
+
+    nn.fit(X_train, y_train, k_folds=10)
+
+    predictions = nn.predict(X_test)
+
+    print(f"Mean Squared Error: {mean_squared_error(predictions, y_test)}")
+    print(f"Mean Absolute Error: {mean_absolute_error(predictions, y_test)}")
+    print(f"Mean Absolute Percentage Error: {mean_absolute_percentage_error(predictions, y_test):.4f}")   
