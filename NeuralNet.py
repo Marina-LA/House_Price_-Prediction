@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 np.random.seed(42) # For reproducibility
 
@@ -14,12 +15,12 @@ class NeuralNet:
         self.fact = fact  # Activation function
 
         # Initialize arrays of arrays
-        self.xi = []
-        self.h = []
-        self.delta = []
-        self.theta = []
-        self.d_theta = []
-        self.d_theta_prev = []
+        self.xi = [] # activations
+        self.h = [] # unit fields
+        self.delta = [] # errors
+        self.theta = [] # thresholds
+        self.d_theta = [] # threshold updates
+        self.d_theta_prev = [] # previous threshold updates
         for lay in range(self.L):
             self.xi.append(np.zeros(layers[lay]))
             self.h.append(np.zeros(layers[lay]))
@@ -29,9 +30,9 @@ class NeuralNet:
             self.d_theta_prev.append(np.zeros(layers[lay]))
 
         # Initialize arrays of matrices
-        self.w = []
-        self.d_w = []
-        self.d_w_prev = []
+        self.w = [] # weights
+        self.d_w = [] # weight updates
+        self.d_w_prev = [] # previous weight updates
         self.w.append(np.random.randn(1, 1) * np.sqrt(2))
         self.d_w.append(np.zeros((1, 1)))
         self.d_w_prev.append(np.zeros((1, 1)))
@@ -74,7 +75,7 @@ class NeuralNet:
         self.train_errors = []
         self.val_errors = []
 
-        for epoch in range(self.epochs):
+        for epoch in tqdm(range(self.epochs)):
             #print(f"Epoch {epoch + 1}/{self.epochs}")
 
             for pat in range(len(X_train)):
