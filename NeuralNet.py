@@ -83,7 +83,7 @@ class NeuralNet:
                 
                 # Perform a feed forward pass
                 self._feed_forward(x)
-
+                
                 # Perform a backpropagation pass
                 self._back_propagate(target)
 
