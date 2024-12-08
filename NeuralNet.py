@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-np.random.seed(42) # For reproducibility
+
 
 class NeuralNet:
     def __init__(self, layers, epochs, learning_rate, momentum, fact, val_split):
@@ -83,7 +83,7 @@ class NeuralNet:
                 
                 # Perform a feed forward pass
                 self._feed_forward(x)
-                
+
                 # Perform a backpropagation pass
                 self._back_propagate(target)
 
@@ -96,7 +96,6 @@ class NeuralNet:
 
             self.train_errors.append(train_error)
             self.val_errors.append(val_error)
-
 
 
     def _feed_forward(self, x):

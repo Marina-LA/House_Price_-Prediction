@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import csv
 
-np.random.seed(42) # For reproducibility
+
 
 class NeuralNet:
     def __init__(self, layers, epochs, learning_rate, momentum, fact, val_split):
@@ -110,7 +110,6 @@ class NeuralNet:
             # Store the final errors of this fold
             self.fold_train_errors.append(self.train_errors)
             self.fold_val_errors.append(self.val_errors)
-
 
 
     def _feed_forward(self, x):
