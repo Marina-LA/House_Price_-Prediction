@@ -167,7 +167,7 @@ class NeuralNet:
 
     def loss_epochs(self):
         """Return arrays with training and validation errors for each epoch."""
-        return np.array(self.train_errors), np.array(self.val_errors)
+        return np.array(self.fold_train_errors), np.array(self.fold_val_errors)
     
 
 
